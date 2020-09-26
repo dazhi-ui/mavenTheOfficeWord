@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>添加顾客</title>
+    <link rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/css/bootstrap.min.css">
+    <!--    <link rel="stylesheet" href="bootstrap/bootstrap.min.css">-->
+    <script src="https://cdn.staticfile.org/jquery/2.1.1/jquery.min.js"></script>
+    <script src="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+</head>
+<style>
+    .main{
+        padding-left: 350px;
+        padding-top: 10px;
+    }
+    .btn{
+        margin-left: 50px;
+    }
+</style>
+<body>
+<div id="show"></div>
+</body>
+<script type="text/javascript">
+    function GetQueryString(name)
+    {
+        var reg = new RegExp("(^|&)"+ name +"=([^&]*)(&|$)");
+        var r = window.location.search.substr(1).match(reg);//search,查询？后面的参数，并匹配正则
+        if(r!=null)return  decodeURIComponent(r[2]); return null;
+    }
+
+    $(function () {
+        title=GetQueryString("username").toString();
+        $.post(
+            "showUserMessage",
+            {	username:username
+            },
+            function(data) {
+
+                var username=data[0].username;
+                var password=data[0].password;
+                var permissionId=data[0].permissionId;
+                var job=data[0].job;
+                var status=data[0].status
+                var id=data[0].id;
+                var text;
+                text="<h2 style=\"font-family: '楷体';text-align: center\">修改用户信息</h2>\n" +
+                    "<div class=\"main\">\n" +
+                    "    <form class=\"form-horizontal\" role=\"form\">\n" +
+                    "        <div class=\"form-group\">\n" +
+                    "            <label for=\"username\" class=\"col-sm-2 control-label\">用户名</label>\n" +
+                    "            <div class=\"col-sm-5\">\n" +
+                    "                <input type=\"text\" class=\"form-control\" id=\"username\" value='"+username+"'>\n" +
+                    "            </div>\n" +
+                    "        </div>\n" +
+                    "        <div class=\"form-group\">\n" +
+                    "            <label for=\"psw\" class=\"col-sm-2 control-label\">密码</label>\n" +
+                    "            <div class=\"col-sm-5\">\n" +
+                    "                <input type=\"password\" class=\"form-control\" id=\"psw\" value='"+password+"'>\n" +
+                    "            </div>\n" +
+                    "        </div>\n" +
+                    "        <div class=\"form-group\">\n" +
+                    "            <label for=\"psw\" class=\"col-sm-2 control-label\">权限ID</label>\n" +
+                    "            <div class=\"col-sm-5\">\n" +
+                    "                <input type=\"password\" class=\"form-control\" id=\"permissionId\" value='"+permissionId+"'>\n" +
+                    "            </div>\n" +
+                    "        </div>\n" +
+                    "        <div class=\"form-group\">\n" +
+                    "            <label for=\"psw\" class=\"col-sm-2 control-label\">工作</label>\n" +
+                    "            <div class=\"col-sm-5\">\n" +
+                    "                <input type=\"password\" class=\"form-control\" id=\"job\" value='"+job+"'>\n" +
+                    "            </div>\n" +
+                    "        </div>\n" +
+                    "        <div class=\"form-group\">\n" +
+                    "            <label for=\"psw\" class=\"col-sm-2 control-label\">用户状态ID</label>\n" +
+                    "            <div class=\"col-sm-5\">\n" +
+                    "                <input type=\"password\" class=\"form-control\" id=\"status\" value='"+status+"'>\n" +
+                    "            </div>\n" +
+                    "        </div>\n" +
+                    "<!--        <div class=\"form-group\">-->\n" +
+                    "<!--            <label class=\"col-sm-2 control-label\">职位</label>-->\n" +
+                    "<!--            <div class=\"col-sm-5\" style=\"padding-top: 5px\">-->\n" +
+                    "<!--                <select id=\"job\">-->\n" +
+                    "<!--                    <option value=\"四销售\">四销售</option>-->\n" +
+                    "<!--                    <option value=\"五销售\">五销售</option>-->\n" +
+                    "<!--                    <option value=\"六销售\">六销售</option>-->\n" +
+                    "<!--                </select>-->\n" +
+                    "<!--            </div>-->\n" +
+                    "<!--        </div>-->\n" +
+                    "        <div class=\"btn\">\n" +
+                    "            <button type=\"button\" class=\"btn btn-primary\" id=\"tijiao\">提交</button>\n" +
+                    "            <button type=\"reset\" class=\"btn btn-warning\">重置</button>\n" +
+                    "        </div>\n" +
+                    "                <input type=\"hidden\" class=\"form-control\" id=\"id\" value='"+id+"'>\n" +
+                    "    </form>\n" +
+                    "</div>";
+                $("#show").html(text);
+            },
+            "json"
+        );
+
+    })
+</script>
+<script>
+    $(function () {
+
+        $("#tijiao").click(function () {
+            var username=$("#username").val();
+            var password=$("#psw").val();
+            var job=$("#job").val();
+            var status=$("#status").val();
+            var permissionId=$("#permissionId").val();
+            var id=$("#id").val();
+
+            // var job=$("#job option:selected").val();
+            if(username==""||password==""||job==""||permissionId||status)
+            {
+                alert("请将信息补充完整！！！");
+            }
+            $.ajax({
+                url: "../updatauser",
+                type: "POST",
+                data: {"username": username, "password": password,"job":job,"permissionId":permissionId,"status":status,"id":id},
+                dataType: "text",
+                async: true,
+                success: function (data) {
+                    if(data=="yes")
+                    {
+                        alert("修改成功！");
+                        location.href="lookuser.html";
+                    }
+                    else
+                    {
+                        alert("修改失败！");
+                        location.href="lookuser.html";
+                    }
+                },
+                error: function (e) {
+                    alert("出现错误！！");
+                }
+            });
+
+        });
+
+    })
+</script>
+</html>

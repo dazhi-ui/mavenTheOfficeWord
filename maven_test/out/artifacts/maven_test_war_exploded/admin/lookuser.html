@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>查看所有用户信息</title>
+    <link rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/css/bootstrap.min.css">
+    <!--    <link rel="stylesheet" href="bootstrap/bootstrap.min.css">-->
+    <script src="https://cdn.staticfile.org/jquery/2.1.1/jquery.min.js"></script>
+    <script src="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+</head>
+<style>
+</style>
+<body>
+<div class="show">
+
+</div>
+<script>
+
+    function del(username)
+    {
+        var msg = "您真的确定要删除吗？";
+        if(confirm(msg)==true){
+            $.post(
+                "../deluser",
+                {	username:username
+                },
+                function(data){
+                    if(data=="yes") {
+                        alert("删除成功！");
+                        location.href = "lookuser.html";
+                    }
+                },
+                "text",
+            );
+        }else{
+            alert("已取消");
+        }
+    }
+
+    function stop(username)
+    {
+        var msg = "您真的停用该用户吗？";
+        if(confirm(msg)==true){
+            $.post(
+                "../stopuser",
+                {	username:username
+                },
+                function(data){
+                    if(data=="yes") {
+                        alert("停用成功！");
+                        location.href = "lookuser.html";
+                    }
+                },
+                "text",
+            );
+        }else{
+            alert("已取消");
+        }
+    }
+
+    function change(username)
+    {
+        var msg = "确定进行修改用户信息操作吗？";
+        if(confirm(msg)==true){
+            // $.post(
+            //     "../stopuser",
+            //     {	username:username
+            //     },
+            //     function(data){
+            //         if(data=="yes") {
+            //             alert("停用成功！");
+            //             location.href = "lookuser.html";
+            //         }
+            //     },
+            //     "text",
+            // );
+            location.href="changeMessage.html?username="+username;
+        }else{
+            alert("已取消");
+        }
+    }
+
+
+    function start(username)
+    {
+        var msg = "您真的启用该用户吗？";
+        if(confirm(msg)==true){
+            $.post(
+                "../startuser",
+                {	username:username
+                },
+                function(data){
+                    if(data=="yes") {
+                        alert("启用成功！");
+                        location.href = "lookuser.html";
+                    }
+                },
+                "text",
+            );
+        }else{
+            alert("已取消");
+        }
+    }
+
+    $(function () {
+            $.ajax({
+                url:'../findalluser',
+                dataType : "json",//数据格式
+                type : "post",//请求方式
+                async : false,//是否异步请求
+                success : function(data)
+                {  //如果请求成功，返回数据。
+                    var text="<table class='table table-striped'><thead><tr>" +
+                        "<th>用户名</th><th>职位</th><th>状态</th><th>操作1</th><th>操作2</th><th>操作3</th><th>操作4</th></tr></thead><tbody>";
+                    for(i=0;i<data.length;i++)
+                    {
+                        var sta="";
+                        if(data[i].status==1)
+                            sta="运行中";
+                        else
+                            sta="停止运行";
+                        text+="<tr>";
+                        text+="<td>"+data[i].username+"</td>" +
+                            // "<td>"+data[i].password+"</td>" +
+                            "<td>"+data[i].job+"</td>" +
+                            "<td>"+sta+"</td>" +
+                            "<td><button class='btn btn-warning' onclick='change(this.value)' value='"+data[i].username+"'>修改用户信息</button></td>" +
+                            "<td><button class='btn btn-warning' onclick='stop(this.value)' value='"+data[i].username+"'>停用</button></td>" +
+                            "<td><button class='btn btn-success' onclick='start(this.value)' value='"+data[i].username+"'>启用</button></td>" +
+                            "<td><button class='btn btn-danger' onclick='del(this.value)' value='"+data[i].username+"'>删除</button></td>" +
+                            "</tr>";
+                    }
+                    text+="</table>";
+                    $(".show").html(text);
+                },
+                error:function (e) {
+                    alert("出错了！");
+                }
+            });
+    })
+</script>
+</body>
+</html>

@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/css/bootstrap.min.css">
+    <!--    <link rel="stylesheet" href="bootstrap/bootstrap.min.css">-->
+    <script src="https://cdn.staticfile.org/jquery/2.1.1/jquery.min.js"></script>
+    <script src="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <title>代发公文</title>
+</head>
+<body>
+<div id="show">
+
+</div>
+</body>
+<script>
+
+    function format(m)
+    {
+        var split = m.split("|");
+        var title=split[0];
+        var status=split[1];
+        if(status!=0)
+            alert("已格式化！");
+        else if(status==0)
+        {
+            var msg = "您确定要格式化吗？";
+            if(confirm(msg)==true){
+                $.post(
+                    "../formatdoc",
+                    {	title:title
+                    },
+                    function(data){
+                        if(data=="yes") {
+                            alert("格式化成功！");
+                            location.href = "notsenddoc.html";
+                        }
+                    },
+                    "text",
+                );
+            }else{
+                alert("已取消");
+            }
+        }
+
+    }
+
+    function send(m)
+    {
+        var split = m.split("|");
+        var title=split[0];
+        var status=split[1];
+        if(status==0)
+            alert("请先格式化！");
+        else if(status==2||status==4)
+            alert("审核或审签不通过！不能发送");
+        else
+        {
+            var msg = "您确定要发送吗？";
+            if(confirm(msg)==true){
+                $.post(
+                    "../senddoc",
+                    {	title:title,
+                        status:status,
+                        username:localStorage.getItem("username")
+                    },
+                    function(data){
+                        if(data=="yes") {
+                            alert("发送成功！");
+                            location.href = "notsenddoc.html";
+                        }
+                    },
+                    "text",
+                );
+            }else{
+                alert("已取消");
+            }
+        }
+    }
+
+    function del(m)
+    {
+        var split = m.split("|");
+        var title=split[0];
+        var status=split[1];
+        if(status==0||status==1)
+            alert("未审核或审签不能删除！");
+        else if(status==3)
+            alert("未审签，不得删除！");
+        else if(status==5)
+            alert("已通过审核和审签，不得删除！");
+        else
+        {
+            var msg = "您确定要删除吗？";
+            if(confirm(msg)==true){
+                $.post(
+                    "../deldoc",
+                    {	title:title,
+                    },
+                    function(data){
+                        if(data=="yes") {
+                            alert("删除成功！");
+                            location.href = "notsenddoc.html";
+                        }
+                    },
+                    "text",
+                );
+            }else{
+                alert("已取消");
+            }
+        }
+    }
+
+    $(function () {
+        $.ajax({
+            url:'../notsenddoc',
+            dataType : "json",//数据格式
+            type : "post",//请求方式
+            async : false,//是否异步请求
+            success : function(data)
+            {  //如果请求成功，返回数据。
+                var text="<table class='table table-striped'><thead><tr>" +
+                    "<th>公文编号</th><th>公文标题</th><th>编辑单位</th><th>接收单位</th><th>时间</th><th>目前状态</th><th>审核结果</th><th>保存状态</th><th>操作1</th><th>操作2</th><th>操作3</th><th>操作4</th></tr></thead><tbody>";
+                for(i=0;i<data.length;i++)
+                {
+                    var sta="";
+                    if(data[i].status==0)
+                        sta="待格式化";
+                    else if(data[i].status==1)
+                        sta="已格式化";
+                    else if(data[i].status==2)
+                        sta="经理不通过";
+                    else if(data[i].status==3)
+                        sta="经理通过";
+                    else if(data[i].status==4)
+                        sta="总经理不通过";
+                    else if(data[i].status==5)
+                        sta="总经理通过";
+                    else if(data[i].status==6)
+                        sta="部门已签收";
+                    var ans="";
+                    if(data[i].status==2)
+                        ans="审核不通过";
+                    else if(data[i].status==4)
+                        ans="审签不通过";
+                    else if(data[i].status==0||data[i].status==1||data[i].status==7)
+                        ans="未审核";
+                    else if(data[i].status==3||data[i].status==8)
+                        ans="审核通过";
+                    else if(data[i].status==5||data[i].status==9)
+                        ans="审签通过";
+                    else if(data[i].status==6)
+                        ans="已审签";
+                    var save="";
+                    if(data[i].del==0)
+                        save="已保存";
+                    else
+                        save="已删除";
+                    text+="<tr>";
+                    text+="<td>"+data[i].id+"</td>" +
+                        "<td><a href='../shownormaldoc.html?title="+data[i].title+"'>"+data[i].title+"</a></td>" +
+                        "<td>"+data[i].owner+"</td>" +
+                        "<td>"+data[i].receiver+"</td>" +
+                        "<td>"+data[i].time+"</td>" +
+                        "<td>"+sta+"</td>" +
+                        "<td>"+ans+"</td>" +
+                        "<td>"+save+"</td>" +
+                        "<td><button class='btn btn-warning' onclick='format(this.value)' value='"+data[i].title+"|"+data[i].status+"'>修改公文</button></td>" +
+                        "<td><button class='btn btn-warning' onclick='format(this.value)' value='"+data[i].title+"|"+data[i].status+"'>格式化</button></td>" +
+                        "<td><button class='btn btn-success' onclick='send(this.value)' value='"+data[i].title+"|"+data[i].status+"'>发送</button></td>" +
+                        "<td><button class='btn btn-danger' onclick='del(this.value)' value='"+data[i].title+"|"+data[i].status+"'>删除</button></td>" +
+                        "</tr>";
+                }
+                text+="</table>";
+                $("#show").html(text);
+            },
+            error:function (e) {
+                alert("出错了！");
+            }
+        });
+    })
+</script>
+</html>

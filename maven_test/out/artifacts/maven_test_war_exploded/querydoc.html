@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/css/bootstrap.min.css">
+    <!--    <link rel="stylesheet" href="bootstrap/bootstrap.min.css">-->
+    <script src="https://cdn.staticfile.org/jquery/2.1.1/jquery.min.js"></script>
+    <script src="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <title>查找公文</title>
+</head>
+<style>
+    #find{
+        width: 100%;
+        padding-top: 10px;
+        padding-bottom: 10px;
+        text-align: center;
+    }
+</style>
+<body>
+<div id="find">
+    发送机构：&nbsp;&nbsp;&nbsp;&nbsp;<input type="text" id="owner" >
+    接收机构：&nbsp;&nbsp;&nbsp;&nbsp;<input type="text" id="receiver" >
+    <button class='btn btn-success' onclick="find()">查找</button>
+</div>
+<div id="show">
+
+</div>
+</body>
+<script>
+
+    function find()
+    {
+        var owner=$("#owner").val();
+        var receiver=$("#receiver").val();
+        $.ajax({
+            url:'finddoc_byowner_receiver',
+            dataType : "json",//数据格式
+            data:{owner:owner,receiver:receiver},
+            type : "post",//请求方式
+            async : false,//是否异步请求
+            success : function(data)
+            {  //如果请求成功，返回数据。
+                var text="<table class='table table-striped'><thead><tr>" +
+                    "<th>公文编号</th><th>公文标题</th><th>编辑单位</th><th>接收单位</th><th>时间</th><th>目前状态</th></tr></thead><tbody>";
+                for(i=0;i<data.length;i++)
+                {
+                    var sta="";
+                    if(data[i].status==0)
+                        sta="待格式化";
+                    else if(data[i].status==1)
+                        sta="已格式化";
+                    else if(data[i].status==2)
+                        sta="经理不通过";
+                    else if(data[i].status==3)
+                        sta="经理通过";
+                    else if(data[i].status==4)
+                        sta="总经理不通过";
+                    else if(data[i].status==5)
+                        sta="总经理通过";
+                    else if(data[i].status==6)
+                        sta="部门已签收";
+                    else if(data[i].status==7)
+                        sta="已发送至经理";
+                    else if(data[i].status==8)
+                        sta="已发送至总经理";
+                    else if(data[i].status==9)
+                        sta="已发送至相关部门";
+                    text+="<tr>";
+                    text+="<td>"+data[i].id+"</td>" +
+                        "<td><a href='shownormaldoc.html?title="+data[i].title+"'>"+data[i].title+"</a></td>" +
+                        "<td>"+data[i].owner+"</td>" +
+                        "<td>"+data[i].receiver+"</td>" +
+                        "<td>"+data[i].time+"</td>" +
+                        "<td>"+sta+"</td>" +
+                        "</tr>";
+                }
+                text+="</table>";
+                $("#show").html(text);
+            },
+            error:function (e) {
+                alert("出错了！"+e.error());
+            }
+        });
+    }
+</script>
+</html>

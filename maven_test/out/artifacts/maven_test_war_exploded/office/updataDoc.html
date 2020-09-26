@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/css/bootstrap.min.css">
+    <!--    <link rel="stylesheet" href="bootstrap/bootstrap.min.css">-->
+    <script src="https://cdn.staticfile.org/jquery/2.1.1/jquery.min.js"></script>
+    <script src="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <title>查看正式公文详情</title>
+</head>
+<style>
+    #title{
+        text-align: center;
+    }
+    hr.new2 {
+        border-top: 1px dashed black;
+    }
+    #content{
+        padding-left: 20px;
+        font-size: 20px;
+        overflow: auto;
+        font-family: "楷体";
+        float: left;
+    }
+    #time
+    {
+        float: right;
+        font-family: "楷体";
+        font-size: 20px;
+        padding-right: 20px;
+    }
+    .btnbag{
+        width:100%;
+        text-align:center;
+    }
+    .btn{
+        width:150px;
+        height:40px;
+        border-radius:5px;
+        background-color:orange;
+        color:black;
+        margin-left:auto;
+        margin-top: 3px;
+    }
+    #shenhe
+    {
+        float: left;
+        width: 100%;
+        overflow: auto;
+        text-align: center;
+    }
+
+</style>
+<body>
+<div id="show">
+
+</div>
+</body>
+<script>
+
+    var title;
+
+
+    function GetQueryString(name)
+    {
+        var reg = new RegExp("(^|&)"+ name +"=([^&]*)(&|$)");
+        var r = window.location.search.substr(1).match(reg);//search,查询？后面的参数，并匹配正则
+        if(r!=null)return  decodeURIComponent(r[2]); return null;
+    }
+
+    $(function () {
+        title=GetQueryString("title").toString();
+        $.post(
+            "getdocby_title",
+            {	title:title
+            },
+            function(data) {
+                var content = data.content;
+                var time = data.time;
+                var year = time.substring(0, 4);
+                var month = time.substring(5, 7);
+                var day = time.substring(8, 10);
+                var ftip = data.ftip;
+                var ctip = data.ctip;
+                text = "<div id='title'>" +
+                    "<h1>公文流转文件</h1>" +
+                    "<h5>*****哪个***</h5>" +
+                    "<hr class='new2'></div>" +
+                    // "<div id='content'>" + content + "</div>" +
+                    "<div class='panel-body'>" +
+                    "<textarea id='content'  style='width: 100%;height: 100px'>" + content + "</textarea>" +
+                    "</div>" +
+                    "<div id='time'>" + year + "年" + month + "月" + day + "日" + "</div>";
+                if (data.status >= 2&&data.status!=7) {
+
+                    text +="<div id='shenhe'>"+
+                        "<div class='panel panel-warning'>" +
+                        "<div class='panel-heading'>" +
+                        "<h3 class='panel-title' style='text-align: left'>经理审核意见</h3>" +
+                        "</div>" +
+                        "<div class='panel-body'>" +
+                        "<textarea id='ftip' disabled style='width: 100%;height: 100px'>" + ftip + "</textarea>" +
+                        "</div>" +
+                        "</div>";
+                    if (data.status == 2) {
+                        text += "<div>" +
+                            "<input type='radio' name='fans' disabled value='同意' id='fagree'>同意" +
+                            "<input type='radio' name='fans' disabled value='不同意' id='funagree' checked>不同意" +
+                            "</div>";
+                    } else {
+                        text += "<div>" +
+                            "<input type='radio' name='fans' disabled value='同意' id='fagree' checked>同意" +
+                            "<input type='radio' name='fans'  disabled value='不同意' id='funagree'>不同意" +
+                            "</div>";
+                    }
+                    if (ctip != undefined || ctip != null) {
+                        text += "<div class='panel panel-warning'>" +
+                            "<div class='panel-heading'>" +
+                            "<h3 class='panel-title' style='text-align: left'>总经理审核意见</h3>" +
+                            "</div>" +
+                            "<div class='panel-body'>" +
+                            "<textarea id='ctip' disabled style='width: 100%;height: 100px'>" + ctip + "</textarea>" +
+                            "</div>" +
+                            "</div>";
+                        if (data.status == 4) {
+                            text += "<div>" +
+                                "<input type='radio' name='cans' disabled value='同意' id='cagree'>同意" +
+                                "<input type='radio' name='cans' disabled value='不同意' id='cunagree' checked>不同意" +
+                                "</div>";
+                        } else {
+                            text += "<div>" +
+                                "<input type='radio' name='cans' disabled value='同意' id='cagree' checked>同意" +
+                                "<input type='radio' name='cans' disabled value='不同意' id='cunagree'>不同意" +
+                                "</div>";
+                        }
+                    }
+                    text+="</div>";
+                }
+                $("#show").html(text);
+            },
+            "json"
+        );
+
+    })
+</script>
+</html>

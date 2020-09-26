@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>办公室页面</title>
+    <link rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://cdn.staticfile.org/jquery/2.1.1/jquery.min.js"></script>
+    <script src="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+</head>
+<style>
+    body{
+        padding: 0;
+        margin:0;
+        background-image: url("../resource/img/background.png");
+    }
+    .content{
+        top: 0;
+        height: 1000px;
+        width: 100%;
+    }
+    .left
+    {
+        background-image: linear-gradient(to top, #30cfd0 0%, #330867 100%);
+        width: 20%;
+        height: 1000px;
+        float: left;
+    }
+    .right{
+        width: 80%;
+        height: 1000px;
+        float: left;
+    }
+</style>
+<body>
+<div class="content">
+    <nav class="navbar navbar-inverse" role="navigation" style="margin-bottom: 0">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <a class="navbar-brand" href="#">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;销售合同管理系统</a>
+            </div>
+        </div>
+    </nav>
+    <div class="left" style="top:0;padding-top: 0">
+        <ul class="nav nav-pills nav-stacked">
+            <li role="presentation" id="bar-1"><a href="notsenddoc.html" target="frame" style="font-size: 18px">待发公文</a></li>
+            <li role="presentation" id="bar-2"><a href="senddoc.html" target="frame" style="font-size: 18px">已发公文</a></li>
+            <li role="presentation" id="bar-3"><a href="deldoc.html" target="frame" style="font-size: 18px">已删除公文</a></li>
+        </ul>
+    </div>
+
+    <div class="right">
+        <iframe id="righFrame" name="frame" width="100%" height="1000px" src="notsenddoc.html" scrolling="yes" style="border:1px solid #CCC;"></iframe>
+    </div>
+
+</div>
+</body>
+<script>
+
+    function chevron_toggle(){
+        $("#collapseParent").find("span").toggleClass("glyphicon-chevron-up");
+        $("#collapseParent").find("span").toggleClass("glyphicon-chevron-down");
+    }
+
+    function updatepwd()
+    {
+        var password=prompt("请输入修改后的密码：");
+        if(password!=""&&password!=null)
+        {
+            $.ajax({
+                url: "../updatepsw",
+                type: "POST",
+                data: {"username": localStorage.getItem("username"), "password": password},
+                dataType: "text",
+                async: true,
+                success: function (data) {
+                    if(data=="yes")
+                        alert("修改成功！");
+                    else
+                        alert("修改失败！");
+                },
+                error: function (e) {
+                    alert("出现错误！！");
+                }
+            });
+        }
+    }
+
+    $(function () {
+        /*用户名的设置*/
+        if(localStorage.getItem("username")!=null&&localStorage.getItem("username")!="")
+        {
+            var str="<ul class='nav navbar-nav navbar-right' ><li class='dropdown'>" +
+                "<a href='#' class='dropdown-toggle' data-toggle='dropdown'>" +
+                "<img src='../resource/img/photo.png' class='img-circle' style='height: 30px;width: 30px'>&nbsp;&nbsp;&nbsp;&nbsp;"+localStorage.getItem("username")+"<b class='caret'></b></a>" +
+                "<ul class='dropdown-menu'>" +
+                "<li><a onclick='updatepwd()'>修改密码</a></li>" +
+                "<li class='divider'></li>" +
+                "<li><a href='../login.html'>退出</a></li></ul></li></ul>";
+            $(".container-fluid").append(str);
+        }
+    });
+</script>
+</html>

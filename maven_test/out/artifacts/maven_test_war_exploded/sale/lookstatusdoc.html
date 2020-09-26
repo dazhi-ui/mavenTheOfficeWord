@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/css/bootstrap.min.css">
+    <!--    <link rel="stylesheet" href="bootstrap/bootstrap.min.css">-->
+    <script src="https://cdn.staticfile.org/jquery/2.1.1/jquery.min.js"></script>
+    <script src="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <title>查看自己的doc状态</title>
+</head>
+<body>
+<div id="show">
+</div>
+</body>
+<script>
+
+    function qianshou(m)
+    {
+        var split = m.split("|");
+        var status=split[0];
+        var owner=split[1];
+        var title=split[2];
+        if(status<=5||status==7||status==8)
+        {
+            alert("不能进行签收！经理或总经理未审核或未通过");
+        }
+        else if(status==6)
+        {
+            alert("已签收！！");
+        }
+        else
+        {
+            var msg = "您真的要签收吗？";
+            if(confirm(msg)==true){
+                $.post(
+                    "../qianshoudoc",
+                    {	owner:owner,
+                        status:"6",
+                        title:title
+                    },
+                    function(data){
+                        if(data=="yes") {
+                            alert("签收成功！");
+                            location.href = "lookstatusdoc.html";
+                        }
+                    },
+                    "text",
+                );
+            }else{
+                alert("已取消");
+            }
+        }
+    }
+
+    $(function () {
+        $.ajax({
+            url:'../lookstatusdoc',
+            dataType : "json",//数据格式
+            data:{owner:localStorage.getItem("username")},
+            type : "post",//请求方式
+            async : false,//是否异步请求
+            success : function(data)
+            {  //如果请求成功，返回数据。
+                var text="<table class='table table-striped'><thead><tr>" +
+                    "<th>公文编号</th><th>公文标题</th><th>编辑单位</th><th>接收单位</th><th>时间</th><th>目前状态</th><th>操作</th></tr></thead><tbody>";
+                for(i=0;i<data.length;i++)
+                {
+                    var sta="";
+                    if(data[i].status==0)
+                        sta="待格式化";
+                    else if(data[i].status==1)
+                        sta="已格式化";
+                    else if(data[i].status==2)
+                        sta="经历不通过";
+                    else if(data[i].status==3)
+                        sta="经理通过";
+                    else if(data[i].status==4)
+                        sta="总经理不通过";
+                    else if(data[i].status==5)
+                        sta="总经理通过";
+                    else if(data[i].status==6)
+                        sta="部门已签收";
+                    else if(data[i].status==7)
+                        sta="已发送至经理";
+                    else if(data[i].status==8)
+                        sta="已发送至总经理";
+                    else if(data[i].status==9)
+                        sta="已发送至相关部门";
+                    text+="<tr>";
+                    text+="<td>"+data[i].id+"</td>" +
+                        "<td><a href='../shownormaldoc.html?title="+data[i].title+"'>"+data[i].title+"</a></td>" +
+                        "<td>"+data[i].owner+"</td>" +
+                        "<td>"+data[i].receiver+"</td>" +
+                        "<td>"+data[i].time+"</td>" +
+                        "<td>"+sta+"</td>" +
+                        "<td><button class='btn btn-success' onclick='qianshou(this.value)' value='"+data[i].status+"|"+data[i].owner+"|"+data[i].title+"'>签收</button></td>" +
+                        "</tr>";
+                }
+                text+="</table>";
+                $("#show").html(text);
+            },
+            error:function (e) {
+                alert("出错了！");
+            }
+        });
+    })
+</script>
+</html>
